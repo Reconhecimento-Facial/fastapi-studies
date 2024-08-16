@@ -3,12 +3,19 @@ from http import HTTPStatus
 from fastapi import FastAPI
 from fastapi.responses import HTMLResponse
 
-from fast_zero.schemas import Message
+from fast_zero.schemas import (
+    MessageSchema,
+    UserDBSchema,
+    UserPublicSchema,
+    UserSchema,
+)
 
 app = FastAPI()
 
+database = []
 
-@app.get('/', status_code=HTTPStatus.OK, response_model=Message)
+
+@app.get('/', status_code=HTTPStatus.OK, response_model=MessageSchema)
 def read_root():
     return {'message': 'bem vindo a raiz do seu servidor'}
 
@@ -25,3 +32,13 @@ def read_ola_da_web():
         </body>
     </html>
     """
+
+
+@app.post(
+    '/users/', status_code=HTTPStatus.CREATED, response_model=UserPublicSchema
+)
+def create_user(user: UserSchema):
+    user_with_it = UserDBSchema(id=len(database) + 1, **user.model_dump())
+
+    database.append(user_with_it)
+    return user_with_it
