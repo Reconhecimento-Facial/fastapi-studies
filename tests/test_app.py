@@ -30,3 +30,40 @@ def test_create_user(client):
         'username': 'lucas',
         'email': 'lucas@exemplo.com',
     }
+
+
+def test_read_users(client):
+    response = client.get('/users/')
+    assert response.status_code == HTTPStatus.OK
+    assert response.json() == {
+        'users': [
+            {
+                'id': 1,
+                'username': 'lucas',
+                'email': 'lucas@exemplo.com',
+            }
+        ]
+    }
+
+
+def test_update_user(client):
+    response = client.put(
+        '/users/1',
+        json={
+            'username': 'lucas_com_put',
+            'email': 'lucas_put@put.com',
+            'password': '12put34put56',
+        },
+    )
+    assert response.status_code == HTTPStatus.OK
+    assert response.json() == {
+        'id': 1,
+        'username': 'lucas_com_put',
+        'email': 'lucas_put@put.com',
+    }
+
+
+def test_delete_user(client):
+    response = client.delete('/users/1')
+    assert response.status_code == HTTPStatus.OK
+    assert response.json() == {'message': 'User deleted successfully'}

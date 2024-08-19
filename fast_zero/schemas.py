@@ -19,3 +19,7 @@ class UserPublicSchema(BaseModel):
     id: int
     username: str
     email: EmailStr
+
+
+class UsersListSchema(BaseModel):
+    users: list[UserPublicSchema]

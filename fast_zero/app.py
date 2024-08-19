@@ -1,6 +1,6 @@
 from http import HTTPStatus
 
-from fastapi import FastAPI
+from fastapi import FastAPI, HTTPException
 from fastapi.responses import HTMLResponse
 
 from fast_zero.schemas import (
@@ -8,6 +8,7 @@ from fast_zero.schemas import (
     UserDBSchema,
     UserPublicSchema,
     UserSchema,
+    UsersListSchema,
 )
 
 app = FastAPI()
@@ -38,7 +39,44 @@ def read_ola_da_web():
     '/users/', status_code=HTTPStatus.CREATED, response_model=UserPublicSchema
 )
 def create_user(user: UserSchema):
-    user_with_it = UserDBSchema(id=len(database) + 1, **user.model_dump())
+    user_with_id = UserDBSchema(id=len(database) + 1, **user.model_dump())
 
-    database.append(user_with_it)
-    return user_with_it
+    database.append(user_with_id)
+    return user_with_id
+
+
+@app.get('/users/', status_code=HTTPStatus.OK, response_model=UsersListSchema)
+def read_users():
+    return {'users': database}
+
+
+@app.put(
+    '/users/{user_id}',
+    status_code=HTTPStatus.OK,
+    response_model=UserPublicSchema,
+)
+def update_user(user_id: int, user: UserSchema):
+    if user_id > len(database) or user_id < 1:
+        raise HTTPException(
+            status_code=HTTPStatus.NOT_FOUND,
+            detail='User not found',
+        )
+
+    database[user_id - 1] = UserDBSchema(id=user_id, **user.model_dump())
+    return database[user_id - 1]
+
+
+@app.delete(
+    '/users/{user_id}',
+    status_code=HTTPStatus.OK,
+    response_model=MessageSchema,
+)
+def delete_user(user_id: int):
+    if user_id > len(database) or user_id < 1:
+        raise HTTPException(
+            status_code=HTTPStatus.NOT_FOUND,
+            detail='User not found',
+        )
+
+    del database[user_id - 1]
+    return {'message': 'User deleted successfully'}
