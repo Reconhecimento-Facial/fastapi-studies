@@ -45,6 +45,21 @@ def create_user(user: UserSchema):
     return user_with_id
 
 
+@app.get(
+    '/users/{user_id}',
+    status_code=HTTPStatus.OK,
+    response_model=UserPublicSchema,
+)
+def get_user(user_id: int):
+    if user_id > len(database) or user_id < 1:
+        raise HTTPException(
+            status_code=HTTPStatus.NOT_FOUND,
+            detail='User not found',
+        )
+
+    return database[user_id - 1]
+
+
 @app.get('/users/', status_code=HTTPStatus.OK, response_model=UsersListSchema)
 def read_users():
     return {'users': database}
