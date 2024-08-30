@@ -1,0 +1,24 @@
+# Define o EOL para todos os arquivos de texto como LF
+* text=auto
+
+# Força arquivos de código-fonte a usar LF como EOL
+*.py text eol=lf
+*.html text eol=lf
+*.css text eol=lf
+*.js text eol=lf
+*.json text eol=lf
+*.yml text eol=lf
+*.yaml text eol=lf
+*.toml text eol=lf
+*.md text eol=lf
+*.txt text eol=lf
+
+# Manter binários intocados
+*.png binary
+*.jpg binary
+*.jpeg binary
+*.gif binary
+*.ico binary
+*.pdf binary
+*.zip binary
+*.exe binary
