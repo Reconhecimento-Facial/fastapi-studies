@@ -27,8 +27,6 @@ test = 'pytest -s -x --cov=fast_zero -vv'
 post_test = 'coverage html'
 lint = 'ruff check . && ruff check . --diff'
 format = 'ruff check . --fix && ruff format .'
-git_add_all = "git add . && powershell -Command \"Get-ChildItem -Recurse -Directory -Filter __pycache__ | ForEach-Object { git rm -r --cached $_.FullName }\""
-
 
 [tool.pytest.ini_options]
 pythonpath = "."
