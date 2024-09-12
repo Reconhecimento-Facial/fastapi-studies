@@ -3,16 +3,12 @@ from sqlalchemy import select
 from fast_zero.models import User
 
 
-def test_create_user(session):
-    user = User(
-        username='vinicabral', password='123', email='vinicius@exemplo.com'
-    )
-
+def test_create_user(session, user):
     session.add(user)
     session.commit()
 
-    user = session.scalar(select(User).where(User.username == 'vinicabral'))
+    user = session.scalar(select(User).where(User.username == 'Teste'))
 
-    assert user.username == 'vinicabral'
-    assert user.password == '123'
-    assert user.email == 'vinicius@exemplo.com'
+    assert user.email == 'teste@test.com'
+    assert user.password == 'testtest'
+    assert user.username == 'Teste'
