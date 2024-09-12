@@ -34,6 +34,48 @@ def test_create_user(client):
     }
 
 
+def test_create_username_already_exist(client, user):
+    response = client.post(
+        '/users/',
+        json={
+            'username': 'Teste',
+            'email': 'teste_email_diferente@test.com',
+            'password': 'testtest',
+        },
+    )
+
+    assert response.status_code == HTTPStatus.BAD_REQUEST
+    assert response.json() == {'detail': 'Username already exists'}
+
+
+def test_create_email_already_exist(client, user):
+    response = client.post(
+        '/users/',
+        json={
+            'username': 'Teste_username_diferente',
+            'email': 'teste@test.com',
+            'password': 'testtest',
+        },
+    )
+
+    assert response.status_code == HTTPStatus.BAD_REQUEST
+    assert response.json() == {'detail': 'Email already exists'}
+
+
+def test_create_username_and_email_already_exist(client, user):
+    response = client.post(
+        '/users/',
+        json={
+            'username': 'Teste',
+            'email': 'teste@test.com',
+            'password': 'testtest',
+        },
+    )
+
+    assert response.status_code == HTTPStatus.BAD_REQUEST
+    assert response.json() == {'detail': 'Username and email already exists'}
+
+
 def test_read_users(client):
     response = client.get('/users/')
     assert response.status_code == HTTPStatus.OK
@@ -97,6 +139,6 @@ def test_delete_user(client, user):
 
 
 def test_delete_user_not_found(client):
-    response = client.delete('/users/1')
+    response = client.delete('/users/2')
     assert response.status_code == HTTPStatus.NOT_FOUND
     assert response.json() == {'detail': 'User not found'}

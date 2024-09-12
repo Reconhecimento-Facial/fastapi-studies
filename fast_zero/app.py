@@ -47,7 +47,12 @@ def create_user(user: UserSchema, session: Session = Depends(get_session)):
     )
 
     if db_user:
-        if db_user.username == user.username:
+        if (db_user.username == user.username and db_user.email == user.email):
+            raise HTTPException(
+                status_code=HTTPStatus.BAD_REQUEST,
+                detail='Username and email already exists',
+            )
+        elif db_user.username == user.username:
             raise HTTPException(
                 status_code=HTTPStatus.BAD_REQUEST,
                 detail='Username already exists',
