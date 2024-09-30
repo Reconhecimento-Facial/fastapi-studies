@@ -10,13 +10,14 @@ from fast_zero.database import get_session
 from fast_zero.models import User
 from fast_zero.schemas import (
     MessageSchema,
-    Token,
+    TokenSchema,
     UserPublicSchema,
     UserSchema,
     UsersListSchema,
 )
 from fast_zero.security import (
     create_access_token,
+    get_current_user,
     get_password_hash,
     verify_password,
 )
@@ -114,22 +115,23 @@ def read_users(
     response_model=UserPublicSchema,
 )
 def update_user(
-    user_id: int, user: UserSchema, session: Session = Depends(get_session)
+    user_id: int,
+    upd_user: UserSchema,
+    session: Session = Depends(get_session),
+    current_user: User = Depends(get_current_user),
 ):
-    db_user = session.scalar(select(User).where(User.id == user_id))
-    if db_user is None:
+    if current_user.id != user_id:
         raise HTTPException(
-            status_code=HTTPStatus.NOT_FOUND,
-            detail='User not found',
+            status_code=HTTPStatus.FORBIDDEN,
+            detail='Not enough permissions',
         )
 
-    db_user.username = user.username
-    db_user.email = user.email
-    db_user.password = get_password_hash(user.password)
-
+    current_user.username = upd_user.username
+    current_user.email = upd_user.email
+    current_user.password = get_password_hash(upd_user.password)
     session.commit()
-    session.refresh(db_user)
-    return db_user
+    session.refresh(current_user)
+    return current_user
 
 
 @app.delete(
@@ -137,22 +139,25 @@ def update_user(
     status_code=HTTPStatus.OK,
     response_model=MessageSchema,
 )
-def delete_user(user_id: int, session: Session = Depends(get_session)):
-    db_user = session.scalar(select(User).where(User.id == user_id))
-    if db_user is None:
+def delete_user(
+    user_id: int,
+    session: Session = Depends(get_session),
+    current_user: User = Depends(get_current_user),
+):
+    if current_user.id != user_id:
         raise HTTPException(
-            status_code=HTTPStatus.NOT_FOUND,
-            detail='User not found',
+            status_code=HTTPStatus.FORBIDDEN,
+            detail='Not enough permissions',
         )
 
-    session.delete(db_user)
+    session.delete(current_user)
     session.commit()
     return {'message': 'User deleted successfully'}
 
 
 @app.post(
     '/token',
-    response_model=Token,
+    response_model=TokenSchema,
 )
 def login_for_access_token(
     form_data: OAuth2PasswordRequestForm = Depends(),
@@ -174,4 +179,4 @@ def login_for_access_token(
 
     access_token = create_access_token(data={'sub': user.email})
 
-    return {'access_token': access_token, 'token_type': 'bearer'}
+    return {'access_token': access_token, 'token_type': 'Bearer'}

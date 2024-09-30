@@ -102,46 +102,54 @@ def test_get_user_not_found(client):
     assert response.json() == {'detail': 'User not found'}
 
 
-def test_update_user(client, user):
+def test_update_user(client, user, token):
     response = client.put(
-        '/users/1',
+        f'/users/{user.id}',
         json={
             'username': 'teste_com_put',
             'email': 'teste_put@put.com',
             'password': 'teste_senha_put',
         },
+        headers={'Authorization': f'Bearer {token}'},
     )
     assert response.status_code == HTTPStatus.OK
     assert response.json() == {
-        'id': 1,
+        'id': user.id,
         'username': 'teste_com_put',
         'email': 'teste_put@put.com',
     }
 
 
-def test_update_user_not_found(client):
+def test_update_user_forbidden(client, token):
     response = client.put(
-        '/users/2',
+        '/users/999',
         json={
             'username': 'teste_com_put',
             'email': 'teste_put@put.com',
             'password': 'teste_senha_put',
         },
+        headers={'Authorization': f'Bearer {token}'},
     )
-    assert response.status_code == HTTPStatus.NOT_FOUND
-    assert response.json() == {'detail': 'User not found'}
+    assert response.status_code == HTTPStatus.FORBIDDEN
+    assert response.json() == {'detail': 'Not enough permissions'}
 
 
-def test_delete_user(client, user):
-    response = client.delete('/users/1')
+def test_delete_user(client, user, token):
+    response = client.delete(
+        f'/users/{user.id}',
+        headers={'Authorization': f'Bearer {token}'},
+    )
     assert response.status_code == HTTPStatus.OK
     assert response.json() == {'message': 'User deleted successfully'}
 
 
-def test_delete_user_not_found(client):
-    response = client.delete('/users/2')
-    assert response.status_code == HTTPStatus.NOT_FOUND
-    assert response.json() == {'detail': 'User not found'}
+def test_delete_user_forbidden(client, token):
+    response = client.delete(
+        '/users/999',
+        headers={'Authorization': f'Bearer {token}'},
+    )
+    assert response.status_code == HTTPStatus.FORBIDDEN
+    assert response.json() == {'detail': 'Not enough permissions'}
 
 
 def test_login_for_access_token(client, user):
@@ -157,7 +165,7 @@ def test_login_for_access_token(client, user):
 
     assert response.status_code == HTTPStatus.OK
     assert 'access_token' in token
-    assert 'token_type' in token
+    assert token['token_type'] == 'Bearer'
 
 
 def test_login_for_access_token_user_not_found(client, user):

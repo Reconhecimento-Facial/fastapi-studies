@@ -13,6 +13,16 @@ from fast_zero.security import get_password_hash
 
 
 @pytest.fixture
+def token(client, user):
+    response = client.post(
+        '/token',
+        data={'username': user.email, 'password': user.clean_password},
+    )
+
+    return response.json()['access_token']
+
+
+@pytest.fixture
 def user(session: Session) -> User:
     password = 'testtest'
     user = User(

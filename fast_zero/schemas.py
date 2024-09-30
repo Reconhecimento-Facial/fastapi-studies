@@ -26,6 +26,10 @@ class UsersListSchema(BaseModel):
     users: list[UserPublicSchema]
 
 
-class Token(BaseModel):
+class TokenSchema(BaseModel):
     access_token: str
     token_type: str
+
+
+class TokenDataSchema(BaseModel):
+    username: str | None = None
