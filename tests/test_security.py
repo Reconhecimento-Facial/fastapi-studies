@@ -20,9 +20,9 @@ def test_jwt():
     assert decoded['exp']
 
 
-def test_get_current_user_invalid_token(client):
+def test_get_current_user_invalid_token(client, user):
     response = client.delete(
-        '/users/1',
+        f'/users/{user.id}',
         headers={'Authorization': 'Bearer token-invalido'},
     )
 
@@ -41,12 +41,12 @@ def test_get_current_user_none_username(client, user):
     assert response.json() == {'detail': 'Could not validate credentials'}
 
 
-def test_get_current_user_user_not_exist(client):
+def test_get_current_user_user_not_exist(client, user):
     token_of_non_existing_user = create_access_token(
         data={'sub': 'doesntexist@doesntexist.com'}
     )
     response = client.delete(
-        '/users/666',
+        f'/users/{user.id + 1}',
         headers={'Authorization': f'Bearer {token_of_non_existing_user}'},
     )
     assert response.status_code == HTTPStatus.UNAUTHORIZED
