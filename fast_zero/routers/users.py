@@ -1,10 +1,8 @@
 from http import HTTPStatus
 
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter, HTTPException
 from sqlalchemy import select
-from sqlalchemy.orm import Session
 
-from fast_zero.database import get_session
 from fast_zero.models import User
 from fast_zero.schemas import (
     MessageSchema,
@@ -13,10 +11,12 @@ from fast_zero.schemas import (
     UsersListSchema,
 )
 from fast_zero.security import (
-    get_current_user,
     get_password_hash,
 )
-from fast_zero.type import T_CurrentUser, T_Session
+from fast_zero.type import (
+    T_CurrentUser,
+    T_Session,
+)
 
 router = APIRouter(prefix='/users', tags=['users'])
 
@@ -94,8 +94,8 @@ def read_users(session: T_Session, skip: int = 0, limit: int = 100):
 def update_user(
     user_id: int,
     upd_user: UserSchema,
-    session: Session = Depends(get_session),
-    current_user: User = Depends(get_current_user),
+    session: T_Session,
+    current_user: T_CurrentUser,
 ):
     if current_user.id != user_id:
         raise HTTPException(

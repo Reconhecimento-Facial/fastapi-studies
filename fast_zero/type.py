@@ -10,4 +10,4 @@ from fast_zero.security import get_current_user
 
 T_Session = Annotated[Session, Depends(get_session)]
 T_CurrentUser = Annotated[User, Depends(get_current_user)]
-T_OAuth2Form = Annotated[OAuth2PasswordRequestForm, Depends()]
+T_OAuth2PasswordRequestForm = Annotated[OAuth2PasswordRequestForm, Depends()]

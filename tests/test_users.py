@@ -21,11 +21,11 @@ def test_create_user(client):
     }
 
 
-def test_create_username_already_exist(client, user):
+def test_create_user_username_already_exist(client, user):
     response = client.post(
         '/users/',
         json={
-            'username': 'Teste',
+            'username': f'{user.username}',
             'email': 'teste_email_diferente@test.com',
             'password': 'testtest',
         },
@@ -35,12 +35,12 @@ def test_create_username_already_exist(client, user):
     assert response.json() == {'detail': 'Username already exists'}
 
 
-def test_create_email_already_exist(client, user):
+def test_create_user_email_already_exist(client, user):
     response = client.post(
         '/users/',
         json={
             'username': 'Teste_username_diferente',
-            'email': 'teste@test.com',
+            'email': f'{user.email}',
             'password': 'testtest',
         },
     )
@@ -49,12 +49,12 @@ def test_create_email_already_exist(client, user):
     assert response.json() == {'detail': 'Email already exists'}
 
 
-def test_create_username_and_email_already_exist(client, user):
+def test_create_user_username_and_email_already_exist(client, user):
     response = client.post(
         '/users/',
         json={
-            'username': 'Teste',
-            'email': 'teste@test.com',
+            'username': f'{user.username}',
+            'email': f'{user.email}',
             'password': 'testtest',
         },
     )
@@ -101,9 +101,9 @@ def test_update_user(client, user, token):
     }
 
 
-def test_update_user_forbidden(client, user, token):
+def test_update_user_forbidden(client, other_user, token):
     response = client.put(
-        f'/users/{user.id + 1}',
+        f'/users/{other_user.id}',
         json={
             'username': 'teste_com_put',
             'email': 'teste_put@put.com',
@@ -124,9 +124,9 @@ def test_delete_user(client, user, token):
     assert response.json() == {'message': 'User deleted successfully'}
 
 
-def test_delete_user_forbidden(client, user, token):
+def test_delete_user_forbidden(client, other_user, token):
     response = client.delete(
-        f'/users/{user.id + 1}',
+        f'/users/{other_user.id}',
         headers={'Authorization': f'Bearer {token}'},
     )
     assert response.status_code == HTTPStatus.FORBIDDEN

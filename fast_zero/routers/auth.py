@@ -11,7 +11,7 @@ from fast_zero.security import (
     create_access_token,
     verify_password,
 )
-from fast_zero.type import T_OAuth2Form, T_Session
+from fast_zero.type import T_OAuth2PasswordRequestForm, T_Session
 
 router = APIRouter(prefix='/auth', tags=['auth'])
 
@@ -20,7 +20,9 @@ router = APIRouter(prefix='/auth', tags=['auth'])
     '/token',
     response_model=TokenSchema,
 )
-def login_for_access_token(session: T_Session, form_data: T_OAuth2Form):
+def login_for_access_token(
+    session: T_Session, form_data: T_OAuth2PasswordRequestForm
+):
     user = session.scalar(select(User).where(User.email == form_data.username))
 
     if not user:
