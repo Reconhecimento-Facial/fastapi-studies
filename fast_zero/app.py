@@ -13,7 +13,7 @@ app.include_router(auth.router)
 
 @app.get('/', status_code=HTTPStatus.OK, response_model=MessageSchema)
 def read_root():
-    return {'message': 'bem vindo a raiz do seu servidor'}
+    return {'message': 'bem vindo a raiz da sua aplicação'}
 
 
 @app.get('/ola_da_web', status_code=HTTPStatus.OK, response_class=HTMLResponse)

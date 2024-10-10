@@ -1,6 +1,6 @@
 from http import HTTPStatus
 
-from fastapi import APIRouter, HTTPException
+from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy import select
 
 from fast_zero.models import User
@@ -9,6 +9,7 @@ from fast_zero.schemas import (
 )
 from fast_zero.security import (
     create_access_token,
+    get_current_user,
     verify_password,
 )
 from fast_zero.type import T_OAuth2PasswordRequestForm, T_Session
@@ -40,3 +41,12 @@ def login_for_access_token(
     access_token = create_access_token(data={'sub': user.email})
 
     return {'access_token': access_token, 'token_type': 'Bearer'}
+
+
+@router.post('/refresh_token', response_model=TokenSchema)
+def refresh_access_token(
+    user: User = Depends(get_current_user),
+):
+    new_access_token = create_access_token(data={'sub': user.email})
+
+    return {'access_token': new_access_token, 'token_type': 'Bearer'}
