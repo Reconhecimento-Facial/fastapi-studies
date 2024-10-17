@@ -1,6 +1,6 @@
 import factory
 
-from fast_zero.models import User
+from fast_zero.models import Todo, User
 from fast_zero.schemas import TodoSchema
 
 
@@ -22,3 +22,10 @@ class TodoSchemaFactory(factory.Factory):
         lambda obj: f'Description of {obj.title}'
     )
     state = 'draft'
+
+
+class TodoFactory(TodoSchemaFactory):
+    class Meta:
+        model = Todo
+
+    user_id = -1
