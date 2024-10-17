@@ -1,6 +1,6 @@
 from http import HTTPStatus
 
-from fastapi import APIRouter, Depends
+from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy import select
 
 from fast_zero.models import Todo
@@ -9,6 +9,7 @@ from fast_zero.schemas import (
     TodoListSchema,
     TodoPublicSchema,
     TodoSchema,
+    TodoUpdateSchema,
 )
 from fast_zero.type import T_CurrentUser, T_Session
 
@@ -63,3 +64,29 @@ def todos_list(
     ).all()
 
     return {'todos': todos}
+
+
+@router.patch('/{todo_id}', response_model=TodoPublicSchema)
+def todo_update_patch(
+    todo_id: int,
+    session: T_Session,
+    current_user: T_CurrentUser,
+    todo: TodoUpdateSchema,
+):
+    db_todo = session.scalar(
+        select(Todo).where(Todo.user_id == current_user.id, Todo.id == todo_id)
+    )
+
+    if not db_todo:
+        raise HTTPException(
+            status_code=HTTPStatus.NOT_FOUND, detail='Task not found.'
+        )
+
+    for key, value in todo.model_dump(exclude_unset=True).items():
+        setattr(db_todo, key, value)
+
+    session.add(db_todo)
+    session.commit()
+    session.refresh(db_todo)
+
+    return db_todo

@@ -119,9 +119,7 @@ def test_list_todos_filter_state(session, user, client, token):
     state = choice([state.value for state in TodoState])
 
     session.bulk_save_objects(
-        TodoFactory.create_batch(
-            todos, user_id=user.id, state=state
-        )
+        TodoFactory.create_batch(todos, user_id=user.id, state=state)
     )
     session.commit()
 
@@ -132,9 +130,7 @@ def test_list_todos_filter_state(session, user, client, token):
     assert len(response.json()['todos']) == todos
 
 
-def test_list_todos_filter_combined(
-    session, user, client, token
-):
+def test_list_todos_filter_combined(session, user, client, token):
     todos = randint(0, 50)
     title = 'Test todo combined'
     description = 'combined description'
@@ -166,3 +162,29 @@ def test_list_todos_filter_combined(
     )
 
     assert len(response.json()['todos']) == todos
+
+
+def test_todos_update_patch_not_found(client, token):
+    todo_id = 1e9
+    response = client.patch(
+        f'/todos/{todo_id}',
+        json={},
+        headers={'Authorization': f'Bearer {token}'},
+    )
+    assert response.status_code == HTTPStatus.NOT_FOUND
+    assert response.json() == {'detail': 'Task not found.'}
+
+
+def test_todo_patch_title(session, client, user, token):
+    todo = TodoFactory(user_id=user.id)
+
+    session.add(todo)
+    session.commit()
+    title = f'novo {todo.title}'
+    response = client.patch(
+        f'/todos/{todo.id}',
+        json={'title': title},
+        headers={'Authorization': f'Bearer {token}'},
+    )
+    assert response.status_code == HTTPStatus.OK
+    assert response.json()['title'] == title

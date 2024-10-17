@@ -37,6 +37,12 @@ class TokenDataSchema(BaseModel):
     username: str | None = None
 
 
+class TodoUpdateSchema(BaseModel):
+    title: str | None = None
+    description: str | None = None
+    state: TodoState | None = None
+
+
 class TodoSchema(BaseModel):
     title: str
     description: str
