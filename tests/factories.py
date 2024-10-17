@@ -1,6 +1,7 @@
 import factory
+import factory.fuzzy
 
-from fast_zero.models import Todo, User
+from fast_zero.models import Todo, TodoState, User
 from fast_zero.schemas import TodoSchema
 
 
@@ -17,11 +18,9 @@ class TodoSchemaFactory(factory.Factory):
     class Meta:
         model = TodoSchema
 
-    title = factory.Sequence(lambda n: f'todo_test_{n}')
-    description = factory.LazyAttribute(
-        lambda obj: f'Description of {obj.title}'
-    )
-    state = 'draft'
+    title = factory.Faker('text')
+    description = factory.Faker('text')
+    state = factory.fuzzy.FuzzyChoice(TodoState)
 
 
 class TodoFactory(TodoSchemaFactory):
