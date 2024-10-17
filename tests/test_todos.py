@@ -188,3 +188,27 @@ def test_todo_patch_title(session, client, user, token):
     )
     assert response.status_code == HTTPStatus.OK
     assert response.json()['title'] == title
+
+
+def test_delete_todo_not_found(client, token):
+    todo_id = 1e9
+    response = client.delete(
+        f'/todos/{todo_id}',
+        headers={'Authorization': f'Bearer {token}'},
+    )
+    assert response.status_code == HTTPStatus.NOT_FOUND
+    assert response.json() == {'detail': 'Task not found.'}
+
+
+def test_delete_todo_successfully(client, session, user, token):
+    todo = TodoFactory(user_id=user.id)
+
+    session.add(todo)
+    session.commit()
+
+    response = client.delete(
+        f'/todos/{todo.id}',
+        headers={'Authorization': f'Bearer {token}'},
+    )
+    assert response.status_code == HTTPStatus.OK
+    assert response.json()['message'] == 'Task deleted successfully.'

@@ -6,6 +6,7 @@ from sqlalchemy import select
 from fast_zero.models import Todo
 from fast_zero.schemas import (
     FilterTodoSchema,
+    MessageSchema,
     TodoListSchema,
     TodoPublicSchema,
     TodoSchema,
@@ -90,3 +91,23 @@ def todo_update_patch(
     session.refresh(db_todo)
 
     return db_todo
+
+
+@router.delete('/{todo_id}', response_model=MessageSchema)
+def delete_todo(
+    todo_id: int,
+    session: T_Session,
+    current_user: T_CurrentUser,
+):
+    todo_db = session.scalar(
+        select(Todo).where(Todo.user_id == current_user.id, Todo.id == todo_id)
+    )
+    if not todo_db:
+        raise HTTPException(
+            status_code=HTTPStatus.NOT_FOUND, detail='Task not found.'
+        )
+
+    session.delete(todo_db)
+    session.commit()
+
+    return {'message': 'Task deleted successfully.'}
