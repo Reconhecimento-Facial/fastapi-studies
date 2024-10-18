@@ -10,7 +10,7 @@ from fast_zero.app import app
 from fast_zero.database import get_session
 from fast_zero.models import User, table_registry
 from fast_zero.security import get_password_hash
-from tests.factories import UserFactory
+from tests.factories import UserModelFactory
 
 
 @pytest.fixture
@@ -26,7 +26,7 @@ def token(client, user: User) -> str:
 @pytest.fixture
 def user(session: Session) -> User:
     password = 'testtest'
-    user = UserFactory(password=get_password_hash(password))
+    user = UserModelFactory(password=get_password_hash(password))
 
     session.add(user)
     session.commit()
@@ -40,7 +40,7 @@ def user(session: Session) -> User:
 @pytest.fixture
 def other_user(session: Session) -> User:
     password = 'testtest'
-    user = UserFactory(password=get_password_hash(password))
+    user = UserModelFactory(password=get_password_hash(password))
 
     session.add(user)
     session.commit()

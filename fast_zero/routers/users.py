@@ -32,7 +32,6 @@ def create_user(user: UserSchema, session: T_Session):
             (User.username == user.username) | (User.email == user.email)
         )
     )
-
     if db_user:
         if db_user.username == user.username and db_user.email == user.email:
             raise HTTPException(
