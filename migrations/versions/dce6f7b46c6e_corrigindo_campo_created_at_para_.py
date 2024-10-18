@@ -31,7 +31,6 @@ def upgrade() -> None:
                 sa.DateTime(),
                 server_default=sa.text('(CURRENT_TIMESTAMP)'), 
                 onupdate=sa.text('(CURRENT_TIMESTAMP)'), 
-                server_onupdate=sa.text('(CURRENT_TIMESTAMP)'),
                 nullable=False
             )
         )
