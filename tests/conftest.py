@@ -1,7 +1,9 @@
+from datetime import datetime
 from typing import Generator
 
 import pytest
 from fastapi.testclient import TestClient
+from freezegun import freeze_time
 from sqlalchemy import create_engine
 from sqlalchemy.orm import Session
 from sqlalchemy.pool import StaticPool
@@ -11,6 +13,13 @@ from fast_zero.database import get_session
 from fast_zero.models import User, table_registry
 from fast_zero.security import get_password_hash
 from tests.factories import UserModelFactory
+
+
+@pytest.fixture
+def mock_db_time():
+    frozen_time = datetime.now().replace(microsecond=0).isoformat()
+    with freeze_time(frozen_time):
+        yield frozen_time
 
 
 @pytest.fixture

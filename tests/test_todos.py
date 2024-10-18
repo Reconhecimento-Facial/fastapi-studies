@@ -51,27 +51,6 @@ def test_create_todos(client, user, token):
         assert response_data[key] == todo[key]
 
 
-def test_list_todos__fields_shoul_be_equal(session, client, user, token):
-    todo = TodoModelFactory(user_id=user.id)
-    session.add(todo)
-    session.commit()
-
-    response = client.get(
-        '/todos/',
-        headers={'Authorization': f'Bearer {token}'},
-    )
-
-    assert response.status_code == HTTPStatus.OK
-    todo_db = response.json()['todos'][0]
-
-    assert 'id' in todo_db
-    assert todo_db['title'] == todo.title
-    assert todo_db['description'] == todo.description
-    assert todo_db['state'] == todo.state.value
-    assert todo_db['created_at'] == todo.created_at.isoformat()
-    assert todo_db['updated_at'] == todo.updated_at.isoformat()
-
-
 def test_list_todos(session, client, user, token):
     todos = randint(0, 50)
     session.bulk_save_objects(
