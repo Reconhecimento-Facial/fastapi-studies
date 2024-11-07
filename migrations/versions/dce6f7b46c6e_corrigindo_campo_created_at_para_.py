@@ -19,28 +19,35 @@ depends_on: Union[str, Sequence[str], None] = None
 
 
 def upgrade() -> None:
-    with op.batch_alter_table('users') as batch_op:
-        batch_op.alter_column(
-            'created_at',
-            type_=sa.DateTime(),
-        )
+   
+    op.execute('''
+        ALTER TABLE users 
+        ALTER COLUMN created_at 
+        TYPE TIMESTAMP WITHOUT TIME ZONE 
+        USING created_at::timestamp without time zone
+    ''')
 
-        batch_op.add_column(
-            sa.Column(
-                'updated_at',
-                sa.DateTime(),
-                server_default=sa.text('(CURRENT_TIMESTAMP)'), 
-                onupdate=sa.text('(CURRENT_TIMESTAMP)'), 
-                nullable=False
-            )
+    op.add_column(
+        'users',
+        sa.Column(
+            'updated_at',
+            sa.DateTime(),
+            server_default=sa.text('(CURRENT_TIMESTAMP)'), 
+            onupdate=sa.text('(CURRENT_TIMESTAMP)'), 
+            nullable=False
         )
+    )
 
 
 def downgrade() -> None:
-    op.drop_column('users', 'updated_at')
+    
+    op.drop_column(
+        'users', 
+        'updated_at'
+    )
 
-    with op.batch_alter_table('users') as batch_op:
-        batch_op.alter_column(
-            'created_at',
-            type_=sa.String(),
-        )
+    op.alter_column(
+        'users',
+        'created_at',
+        type_=sa.String(),
+    )
