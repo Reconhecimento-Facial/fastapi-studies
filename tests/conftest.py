@@ -6,7 +6,7 @@ from fastapi.testclient import TestClient
 from freezegun import freeze_time
 from sqlalchemy import create_engine
 from sqlalchemy.orm import Session
-from sqlalchemy.pool import StaticPool
+from testcontainers.postgres import PostgresContainer
 
 from fast_zero.app import app
 from fast_zero.database import get_session
@@ -22,14 +22,35 @@ def mock_db_time():
         yield frozen_time
 
 
-@pytest.fixture
-def token(client, user: User) -> str:
-    response = client.post(
-        '/auth/token',
-        data={'username': user.email, 'password': user.clean_password},
-    )
+@pytest.fixture(scope='session')
+def engine() -> Generator:
+    with PostgresContainer(image='postgres:16', driver='psycopg') as postgres:
+        _engine = create_engine(postgres.get_connection_url())
 
-    return response.json()['access_token']
+        with _engine.begin():
+            yield _engine
+
+
+@pytest.fixture
+def session(engine) -> Generator[Session, None, None]:
+    table_registry.metadata.create_all(engine)
+
+    with Session(engine) as session:
+        yield session
+
+    table_registry.metadata.drop_all(engine)
+
+
+@pytest.fixture
+def client(session: Session) -> Generator[TestClient, None, None]:
+    def get_session_test():
+        return session
+
+    with TestClient(app) as client:
+        app.dependency_overrides[get_session] = get_session_test
+        yield client
+
+    app.dependency_overrides.clear()
 
 
 @pytest.fixture
@@ -61,27 +82,10 @@ def other_user(session: Session) -> User:
 
 
 @pytest.fixture
-def client(session: Session) -> Generator[TestClient, None, None]:
-    def get_session_teste():
-        return session
-
-    with TestClient(app) as client:
-        app.dependency_overrides[get_session] = get_session_teste
-        yield client
-
-    app.dependency_overrides.clear()
-
-
-@pytest.fixture
-def session() -> Generator[Session, None, None]:
-    engine = create_engine(
-        'sqlite:///:memory:',
-        connect_args={'check_same_thread': False},
-        poolclass=StaticPool,
+def token(client, user: User) -> str:
+    response = client.post(
+        '/auth/token',
+        data={'username': user.email, 'password': user.clean_password},
     )
-    table_registry.metadata.create_all(engine)
 
-    with Session(engine) as session:
-        yield session
-
-    table_registry.metadata.drop_all(engine)
+    return response.json()['access_token']

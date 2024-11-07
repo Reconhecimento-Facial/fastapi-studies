@@ -15,6 +15,7 @@ pyjwt = "^2.9.0"
 pwdlib = {extras = ["argon2"], version = "^0.2.1"}
 tzdata = "^2024.1"
 python-multipart = "^0.0.9"
+psycopg = {extras = ["binary"], version = "^3.2.3"}
 
 
 [tool.poetry.group.dev.dependencies]
@@ -25,6 +26,7 @@ httpx = "^0.27.0"
 taskipy = "^1.13.0"
 factory-boy = "^3.3.1"
 freezegun = "^1.5.1"
+testcontainers = "^4.8.2"
 
 [tool.taskipy.tasks]
 run = 'fastapi dev fast_zero/app.py'
