@@ -37,6 +37,7 @@ def session(engine) -> Generator[Session, None, None]:
 
     with Session(engine) as session:
         yield session
+        session.rollback()
 
     table_registry.metadata.drop_all(engine)
 
